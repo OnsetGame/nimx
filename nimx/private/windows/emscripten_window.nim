@@ -227,13 +227,17 @@ proc updateCanvasSize(w: EmscriptenWindow) =
     let screenAspect = width / height
 
     var scaleFactor: Coord
+    when defined(disableEmscriptenFixedRatio):
+        scaleFactor = 1.0
+
     if (screenAspect > aspectRatio):
         scaleFactor = height / maxHeight
     else:
         scaleFactor = width / maxWidth
 
-    width = maxWidth * scaleFactor
-    height = maxHeight * scaleFactor
+    when not defined(disableEmscriptenFixedRatio):
+        width = maxWidth * scaleFactor
+        height = maxHeight * scaleFactor
 
     w.pixelRatio = screenScaleFactor()
 
