@@ -14,11 +14,21 @@ proc initSDLIfNeeded() =
         if sdl2.init(INIT_VIDEO) != SdlSuccess:
             logi "Error: sdl2.init(INIT_VIDEO): ", getError()
         sdlInitialized = true
+        if glSetAttribute(SDL_GL_RED_SIZE, 8) == 0:
+            discard glSetAttribute(SDL_GL_GREEN_SIZE, 8)
+            discard glSetAttribute(SDL_GL_BLUE_SIZE, 8)
+            info "supported color format RGB888"
+        else: #if RGB888 not support
+            discard glSetAttribute(SDL_GL_RED_SIZE, 5)
+            discard glSetAttribute(SDL_GL_GREEN_SIZE, 6)
+            discard glSetAttribute(SDL_GL_BLUE_SIZE, 5)
+            info "supported color format RGB565"
+
         if glSetAttribute(SDL_GL_STENCIL_SIZE, 8) != 0:
             logi "Error: could not set stencil size: ", getError()
 
         when defined(ios) or defined(android):
-            discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0x0004)
+            discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES)
             discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2)
 
 type SdlWindow* = ref object of Window
