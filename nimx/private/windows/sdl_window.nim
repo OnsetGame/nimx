@@ -13,16 +13,18 @@ proc initSDLIfNeeded() =
     if not sdlInitialized:
         if sdl2.init(INIT_VIDEO) != SdlSuccess:
             logi "Error: sdl2.init(INIT_VIDEO): ", getError()
+        else:
+            if glSetAttribute(SDL_GL_RED_SIZE, 8) == 0:
+                discard glSetAttribute(SDL_GL_GREEN_SIZE, 8)
+                discard glSetAttribute(SDL_GL_BLUE_SIZE, 8)
+                info "supported color format RGB888"
+            else: #if RGB888 not support
+                discard glSetAttribute(SDL_GL_RED_SIZE, 5)
+                discard glSetAttribute(SDL_GL_GREEN_SIZE, 6)
+                discard glSetAttribute(SDL_GL_BLUE_SIZE, 5)
+                info "supported color format RGB565"
+
         sdlInitialized = true
-        if glSetAttribute(SDL_GL_RED_SIZE, 8) == 0:
-            discard glSetAttribute(SDL_GL_GREEN_SIZE, 8)
-            discard glSetAttribute(SDL_GL_BLUE_SIZE, 8)
-            info "supported color format RGB888"
-        else: #if RGB888 not support
-            discard glSetAttribute(SDL_GL_RED_SIZE, 5)
-            discard glSetAttribute(SDL_GL_GREEN_SIZE, 6)
-            discard glSetAttribute(SDL_GL_BLUE_SIZE, 5)
-            info "supported color format RGB565"
 
         if glSetAttribute(SDL_GL_STENCIL_SIZE, 8) != 0:
             logi "Error: could not set stencil size: ", getError()
