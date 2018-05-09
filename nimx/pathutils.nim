@@ -78,8 +78,9 @@ proc toAbsolutePath*(relativeOrAbsolutePath, basePath: string): string =
     result = basePath & '/' & relativeOrAbsolutePath
     normalizePath(result)
 
+var getCurrentHref*: proc(): string
 when defined(js):
-    proc getCurrentHref*(): string =
+    getCurrentHref = proc(): string =
         var s: cstring
         {.emit: """
         `s` = window.location.href;
@@ -87,8 +88,7 @@ when defined(js):
         result = $s
 elif defined(emscripten):
     import jsbind.emscripten
-
-    proc getCurrentHref*(): string =
+    getCurrentHref = proc(): string =
         let r = EM_ASM_INT """
         return _nimem_s(window.location.href);
         """
