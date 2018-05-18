@@ -165,6 +165,8 @@ proc processTouchEvent*(v: View, e : var Event): bool =
                         else:
                             if not v.isMainWindow(e):
                                 result = v.onTouchEv(e)
+
+            v.window.handleMouseOverEvent(e)
         else:
             if v.isMainWindow(e):
                 v.handleMouseOverEvent(e)
