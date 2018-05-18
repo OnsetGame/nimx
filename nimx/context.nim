@@ -414,10 +414,10 @@ void main() {
 #extension GL_OES_standard_derivatives : enable
 precision mediump float;
 #endif
-uniform vec4 uFillColor;
+uniform vec4 uStrokeColor;
 
 void compose() {
-    gl_FragColor = uFillColor;
+    gl_FragColor = uStrokeColor;
 }
 """, false)
 
@@ -427,8 +427,7 @@ proc bezierPoint(p0, p1, p2, p3, t: float32): float32 =
     (3 * (1-t) * t * t * p2) +
     (pow(t, 3) * p3)
 
-proc drawBezier*(p0, p1, p2, p3: Point) =
-    let c = currentContext()
+proc drawBezier*(c: GraphicsContext, p0, p1, p2, p3: Point) =
     let gl = c.gl
     var cc = gl.getCompiledComposition(simpleComposition)
 
@@ -446,7 +445,7 @@ proc drawBezier*(p0, p1, p2, p3: Point) =
     compositionDrawingDefinitions(cc, c, gl)
 
     gl.uniformMatrix4fv(uniformLocation("uModelViewProjectionMatrix"), false, c.transform)
-    setUniform("uFillColor", c.fillColor)
+    setUniform("uStrokeColor", c.strokeColor)
     setupPosteffectUniforms(cc)
 
     const componentsCount = 2
@@ -456,7 +455,7 @@ proc drawBezier*(p0, p1, p2, p3: Point) =
 
     # gl.enable(GL_LINE_SMOOTH)
     # glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
-    glLineWidth(2.0)
+    glLineWidth(c.strokeWidth)
     gl.drawArrays(GL_LINE_STRIP, 0.GLint, vertexCount.GLsizei)
     glLineWidth(1.0)
 
