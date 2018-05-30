@@ -17,7 +17,7 @@ import sample10_text
 import sample11_expanded_views
 import sample12_menus
 import sample13_drag_and_drop
-import sample14_layout
+# import sample14_layout
 
 const isMobile = defined(ios) or defined(android)
 

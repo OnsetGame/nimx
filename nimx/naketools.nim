@@ -180,7 +180,7 @@ proc findEnvPaths(b: Builder) =
         if sdlHome.len == 0: error_msg &= getEnvErrorMsg("SDL_HOME")
 
         if error_msg.len > 0:
-            raiseOSError(error_msg)
+            raiseOSError(0.OSErrorCode, error_msg)
 
         b.sdlRoot = sdlHome
 
