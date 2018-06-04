@@ -435,7 +435,7 @@ proc drawBezier*(c: GraphicsContext, p0, p1, p2, p3: Point) =
         c.vertexes[index * 2 + 0] = p.x.GLfloat
         c.vertexes[index * 2 + 1] = p.y.GLfloat
 
-    let vertexCount = 30
+    let vertexCount = 300
     for i in 0..<vertexCount:
         let t = i / (vertexCount - 1)
         let p = newPoint(bezierPoint(p0.x, p1.x, p2.x, p3.x, t), bezierPoint(p0.y, p1.y, p2.y, p3.y, t))
@@ -453,8 +453,9 @@ proc drawBezier*(c: GraphicsContext, p0, p1, p2, p3: Point) =
     c.bindVertexData(componentsCount * vertexCount)
     gl.vertexAttribPointer(saPosition.GLuint, componentsCount, gl.FLOAT, false, 0, 0)
 
-    # gl.enable(GL_LINE_SMOOTH)
-    # glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+    gl.enable(GL_LINE_SMOOTH)
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+
     glLineWidth(c.strokeWidth)
     gl.drawArrays(GL_LINE_STRIP, 0.GLint, vertexCount.GLsizei)
     glLineWidth(1.0)

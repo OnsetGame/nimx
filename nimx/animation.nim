@@ -17,8 +17,8 @@ type CancelBehavior* = enum
     cbJumpToEnd
     cbContinueUntilEndOfLoop
 
-type TimingFunction = proc(time: float): float
-type AnimationFunction = proc(progress: float)
+type TimingFunction* = proc(time: float): float
+type AnimationFunction* = proc(progress: float)
 
 const MIN_LOOP_DURATION:float = 0.0
 
