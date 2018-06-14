@@ -614,6 +614,7 @@ when true:
     ## http://easings.net
     proc linear*(time: float): float =
         result = time
+
     ## -------------------------------------------------------------
     proc sineEaseIn*(time: float): float =
         result = -1 * cos(time * PI_X2) + 1
@@ -730,6 +731,9 @@ when true:
             var s = period / 4
             var var_time = time - 1
             result = -pow(2, 10 * var_time) * sin((var_time - s) * PI_X2 / period)
+    proc elasticEaseIn*(period: float) : TimingFunction =
+        result = proc(p:float): float =
+            elasticEaseIn(p, period)
 
     proc elasticEaseOut*(time, period: float): float =
         if time <= 0.0001 or 0 >= 0.9999:
@@ -737,6 +741,9 @@ when true:
         else:
             var s = period / 4
             result = pow(2, -10 * time) * sin((time - s) * PI_X2 / period) + 1
+    proc elasticEaseOut*(period: float) : TimingFunction =
+        result = proc(p:float): float =
+            elasticEaseOut(p, period)
 
     proc elasticEaseInOut*(time, period: float): float =
         if time <= 0.0001 or 0 >= 0.9999:
@@ -753,14 +760,22 @@ when true:
                 result = -0.5 * pow(2, 10 * var_time) * sin((var_time - s) * PI_X2/nPeriod)
             else:
                 result = pow(2, -10 * var_time) * sin((var_time - s) * PI_X2/nPeriod) * 0.5 + 1
-
+    proc elasticEaseInOut*(period: float) : TimingFunction =
+        result = proc(p:float): float =
+            elasticEaseInOut(p, period)
     ## -------------------------------------------------------------
     proc backEaseIn*(time: float, overshoot: float = 1.70158): float =
         result = time * time * ((overshoot + 1) * time - overshoot)
+    proc backEaseIn*(overshoot: float) : TimingFunction =
+        result = proc(p:float): float =
+            backEaseIn(p, overshoot)
 
     proc backEaseOut*(time: float, overshoot:float = 1.70158): float =
         var var_time = time - 1
         result = var_time * var_time * ((overshoot + 1) * var_time + overshoot) + 1
+    proc backEaseOut*(overshoot: float) : TimingFunction =
+        result = proc(p:float): float =
+            backEaseOut(p, overshoot)
 
     proc backEaseInOut*(time: float, overshoot: float = 1.70158): float =
         var var_time = time * 2
@@ -769,7 +784,9 @@ when true:
         else:
             var_time -= 2
             result = (var_time * var_time * ((overshoot + 1) * var_time + overshoot)) / 2 + 1
-
+    proc backEaseInOut*(overshoot: float) : TimingFunction =
+        result = proc(p:float): float =
+            backEaseInOut(p, overshoot)
     ## -------------------------------------------------------------
     proc bounceTime(time: float): float =
         if time < 1 / 2.75:
@@ -796,7 +813,7 @@ when true:
             result = ( 1 - bounceTime(1 - var_time)) * 0.5
         else:
             result = bounceTime(time * 2 - 1) * 0.5 + 0.5
-
+#
     ## -------------------------------------------------------------
     proc quadraticIn*(time: float): float =
         result = pow(time, 2)

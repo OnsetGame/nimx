@@ -49,8 +49,9 @@ method init*(v: AnimationEasing, r: Rect) =
             bezierView.p3 = bezierWp[2]
             bezierView.p4 = bezierWp[3]
 
-
     discard newLabel(v, newPoint(10, 20), newSize(10, 20), "bezier(")
+
+    discard newLabel(v, newPoint(10, 50), newSize(500, 50), "To drag first point use left mouse button, second - right")
 
     for i in 0 .. 3:
         var tf1 = newTextField(newRect(70 * (i + 1).float, 20, 65, 20))
@@ -70,6 +71,7 @@ method init*(v: AnimationEasing, r: Rect) =
     startStopButton.onAction do():
 
         v.animationCurved.timingFunction = bezierTimingFunction(bezierWp[0], bezierWp[1], bezierWp[2], bezierWp[3])
+        v.animationLinear.timingFunction = linear
 
         v.window.addAnimation(v.animationLinear)
         v.window.addAnimation(v.animationCurved)
