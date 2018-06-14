@@ -766,16 +766,16 @@ when true:
     ## -------------------------------------------------------------
     proc backEaseIn*(time: float, overshoot: float = 1.70158): float =
         result = time * time * ((overshoot + 1) * time - overshoot)
-    proc backEaseIn*(overshoot: float) : TimingFunction =
+    proc backEaseIn*() : TimingFunction =
         result = proc(p:float): float =
-            backEaseIn(p, overshoot)
+            backEaseIn(p, 1.70158)
 
     proc backEaseOut*(time: float, overshoot:float = 1.70158): float =
         var var_time = time - 1
         result = var_time * var_time * ((overshoot + 1) * var_time + overshoot) + 1
-    proc backEaseOut*(overshoot: float) : TimingFunction =
+    proc backEaseOut*() : TimingFunction =
         result = proc(p:float): float =
-            backEaseOut(p, overshoot)
+            backEaseOut(p, 1.70158)
 
     proc backEaseInOut*(time: float, overshoot: float = 1.70158): float =
         var var_time = time * 2
@@ -784,9 +784,10 @@ when true:
         else:
             var_time -= 2
             result = (var_time * var_time * ((overshoot + 1) * var_time + overshoot)) / 2 + 1
-    proc backEaseInOut*(overshoot: float) : TimingFunction =
+    proc backEaseInOut*() : TimingFunction =
         result = proc(p:float): float =
-            backEaseInOut(p, overshoot)
+            backEaseInOut(p, 1.70158)
+
     ## -------------------------------------------------------------
     proc bounceTime(time: float): float =
         if time < 1 / 2.75:
