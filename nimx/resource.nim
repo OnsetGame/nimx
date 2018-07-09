@@ -117,7 +117,7 @@ proc pathForResourceAux(name: string): string =
 proc pathForResource*(name: string): string =
     result = pathForResourceAux(name)
     if not result.isNil:
-        result.normalizePath()
+        pathutils.normalizePath(result)
 
 proc resourceNameForPathAux(path: string): string =
     if parentResources.len > 0:
