@@ -21,7 +21,7 @@ requires "plists"
 requires "variant >= 0.2 & < 0.3"
 requires "kiwi"
 
-requires "jester#head" # required to run a web server from the nakefile to serve WebGL variant
+requires "jester#9bf7ee0c73b0658141be7b1eaa1625249774e04b" # required to run a web server from the nakefile to serve WebGL variant
 requires "https://github.com/yglukhov/ttf >= 0.2.3 & < 0.3"
 requires "https://github.com/yglukhov/async_http_request"
 requires "jsbind"
