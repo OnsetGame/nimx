@@ -810,13 +810,12 @@ proc build*(b: Builder) =
 proc processOutputFromAutotestStream(s: Stream): bool =
     var line = ""
     while s.readLine(line):
+        echo line
         if line.find("---AUTO-TEST-QUIT---") != -1:
             result = true
             break
         elif line.find("---AUTO-TEST-FAIL---") != -1:
             break
-        else:
-            echo line
 
 proc queryStringWithArgs(args: StringTableRef): string =
     if args.isNil:
