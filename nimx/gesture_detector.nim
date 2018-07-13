@@ -339,7 +339,7 @@ method onGestEvent*(d: FlingGestureDetector, e: var Event) : bool =
 
 # method handleGesEvent*(d: GestureDetector, e: var Event, c: var EventFilterControl) : bool {.base, deprecated.} = discard
 
-# template registerDetector*(d: GestureDetector, ev: var Event): stmt {.immediate, deprecated.} =
+# template registerDetector*(d: GestureDetector, ev: var Event): untyped {.immediate, deprecated.} =
 #     mainApplication().pushEventFilter do(e: var Event, c: var EventFilterControl) -> bool:
 #         if e.kind == etTouch or e.kind == etMouse:
 #             result = d.handleGesEvent(e, c)
