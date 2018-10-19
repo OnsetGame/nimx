@@ -1,23 +1,23 @@
 import unicode, streams, logging
 
 import nimx / [ types, timer, portable_gl ]
-import nimx.private.font.font_data
+import nimx/private/font/font_data
 
 when defined(js):
-    import private.font.js_glyph_provider
+    import private/font/js_glyph_provider
     type GlyphProvider = JsGlyphProvider
 else:
-    import private.font.stb_ttf_glyph_provider
+    import private/font/stb_ttf_glyph_provider
     type GlyphProvider = StbTtfGlyphProvider
 
     import os
     import write_image_impl
 
-import private.edtaa3func # From ttf library
-import private.simple_table
+import ttf/edtaa3func
+import private/simple_table
 
 when defined(android):
-    import nimx.assets.url_stream
+    import nimx/assets/url_stream
 
 type Baseline* = enum
     bTop
@@ -241,9 +241,8 @@ proc newFontWithFace*(face: string, size: float): Font =
         result.glyphMargin = 8
     else:
         let path = findFontFileForFace(face)
-        if path != nil:
+        if path.len != 0:
             result = newFontWithFile(path, size)
-
         else:
             when defined(android):
                 let path = face & ".ttf"
@@ -317,14 +316,14 @@ var chunksToGen = newSeq[CharInfo]()
 
 proc generateDistanceFields() =
     let ch = chunksToGen[^1]
-    if not ch.data.dfDoneForGlyph.isNil:
+    if ch.data.dfDoneForGlyph.len != 0:
         for i in 0 ..< charChunkLength:
             if not ch.data.dfDoneForGlyph[i]:
                 generateDistanceFieldForGlyph(ch, i, true)
                 return
     chunksToGen.setLen(chunksToGen.len - 1)
-    ch.data.bitmap = nil
-    ch.data.dfDoneForGlyph = nil
+    ch.data.bitmap.setLen(0)
+    ch.data.dfDoneForGlyph.setLen(0)
     if chunksToGen.len == 0:
         glyphGenerationTimer.clear()
         glyphGenerationTimer = nil
@@ -365,7 +364,7 @@ proc chunkAndCharIndexForRune(f: Font, r: Rune): tuple[ch: CharInfo, index: int]
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
             #gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
             #gl.generateMipmap(gl.TEXTURE_2D)
-        elif not ch.data.dfDoneForGlyph.isNil and not ch.data.dfDoneForGlyph[result.index]:
+        elif ch.data.dfDoneForGlyph.len != 0 and not ch.data.dfDoneForGlyph[result.index]:
             generateDistanceFieldForGlyph(ch, result.index, true)
 
 proc getQuadDataForRune*(f: Font, r: Rune, quad: var openarray[Coord], offset: int, texture: var TextureRef, pt: var Point) =

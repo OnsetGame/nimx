@@ -45,7 +45,7 @@ template setupTexParams(gl: GL) =
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
 
 when not web:
-    include private.image_pvr
+    include private/image_pvr
 
 method setFilePath*(i: Image, path: string) {.base.} = discard
 method setFilePath*(i: SelfContainedImage, path: string) =
@@ -241,7 +241,7 @@ when defined(js):
 
         let err = gl.getError()
         if err != 0.GLenum:
-            logi "GL error in texture load: ", err.int.toHex(), ": ", if i.mFilePath.isNil: "nil" else: i.mFilePath
+            logi "GL error in texture load: ", err.int.toHex(), ": ", i.mFilePath
 
 method getTextureQuad*(i: SelfContainedImage, gl: GL, texCoords: var array[4, GLfloat]): TextureRef =
     when defined js:
@@ -386,7 +386,7 @@ when asyncResourceLoad:
     const loadAsyncTextureInMainThread = defined(android) or defined(ios)
 
     import threadpool, perform_on_main_thread, sdl2
-    import private.worker_queue
+    import private/worker_queue
 
     var threadCtx : GlContextPtr
     var loadingQueue: WorkerQueue
@@ -433,7 +433,7 @@ when asyncResourceLoad:
     proc loadResourceThreaded(ctx: pointer) {.cdecl.} =
         var url = cast[ImageLoadingCtx](ctx).url
         openStreamForUrl(url) do(s: Stream, err: string):
-            if not err.isNil:
+            if err.len != 0:
                 logi "Could not load url: ", url
                 logi "Error: ", err
             var data = s.readAll()
@@ -473,7 +473,7 @@ when asyncResourceLoad:
             performOnMainThread(cast[proc(data: pointer){.cdecl, gcsafe.}](p), ctx)
 
 when defined(emscripten):
-    import jsbind.emscripten
+    import jsbind/emscripten
 
     type ImageLoadingCtx = ref object
         path: string
@@ -588,9 +588,9 @@ elif defined(js):
         """.}
 
 else:
-    import nimx.http_request
+    import nimx/http_request
     proc loadImageFromURL*(url: string, callback: proc(i: Image)) =
-        sendRequest("GET", url, nil, []) do(r: Response):
+        sendRequest("GET", url, "", []) do(r: Response):
             if r.statusCode >= 200 and r.statusCode < 300:
                 let i = newSelfContainedImage()
                 var x, y, comp: cint

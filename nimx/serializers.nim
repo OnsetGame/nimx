@@ -108,8 +108,6 @@ template deserialize*(s: Deserializer, v: var int) =
 
 method deserializeFields*(o: RootRef, s: Deserializer) {.base.} = discard
 
-proc makeSeq*[T](v: var seq[T], len: int) = v = newSeq[T](len)
-
 template typeOfSetElem[T](s: set[T]): typedesc = T
 
 proc deserialize*[T](s: Deserializer, o: var T) =
@@ -127,10 +125,7 @@ proc deserialize*[T](s: Deserializer, o: var T) =
         s.endObjectOrArray()
     elif o is seq:
         let ln = s.beginArray()
-        if o.isNil:
-            o.makeSeq(ln)
-        else:
-            o.setLen(ln)
+        o.setLen(ln)
         for i in 0 ..< ln:
             s.curIndex = i
             s.deserialize(o[i])
@@ -192,8 +187,6 @@ proc pushJsonNode(s: JsonSerializer, n: JsonNode) =
     if s.nodeStack.len > 0:
         s.serializeJsonNode(n)
         s.nodeStack.add(n)
-    elif s.nodeStack.isNil:
-        s.nodeStack = @[n]
     else:
         s.nodeStack.add(n)
 
@@ -228,7 +221,7 @@ proc newJsonDeserializer*(n: JsonNode): JsonDeserializer =
 proc deserializeJsonNode(s: JsonDeserializer): JsonNode =
     let ln = s.nodeStack[^1]
     if ln.kind == JObject:
-        assert(s.curKey != nil)
+        assert(s.curKey.len != 0)
 
         result = ln{s.curKey}
     elif ln.kind == JArray:
@@ -243,16 +236,12 @@ proc pushJsonNode(s: JsonDeserializer) =
         let n = s.deserializeJsonNode()
         s.nodeStack.add(n)
 
-method deserialize(s: JsonDeserializer, v: var bool) = v = s.deserializeJsonNode().bval
-method deserialize(s: JsonDeserializer, v: var int32) = v = int32(s.deserializeJsonNode().num)
-method deserialize(s: JsonDeserializer, v: var int64) = v = int64(s.deserializeJsonNode().num)
+method deserialize(s: JsonDeserializer, v: var bool) = v = s.deserializeJsonNode().getBool()
+method deserialize(s: JsonDeserializer, v: var int32) = v = int32(s.deserializeJsonNode().getInt())
+method deserialize(s: JsonDeserializer, v: var int64) = v = int64(s.deserializeJsonNode().getInt())
 
-when NimVersion <= "0.17.2":
-  method deserialize(s: JsonDeserializer, v: var float32) = v = s.deserializeJsonNode().getFNum()
-  method deserialize(s: JsonDeserializer, v: var float64) = v = s.deserializeJsonNode().getFNum()
-else:
-  method deserialize(s: JsonDeserializer, v: var float32) = v = s.deserializeJsonNode().getFloat()
-  method deserialize(s: JsonDeserializer, v: var float64) = v = s.deserializeJsonNode().getFloat()
+method deserialize(s: JsonDeserializer, v: var float32) = v = s.deserializeJsonNode().getFloat()
+method deserialize(s: JsonDeserializer, v: var float64) = v = s.deserializeJsonNode().getFloat()
 
 method deserialize(s: JsonDeserializer, v: var string) =
     let n = s.deserializeJsonNode()

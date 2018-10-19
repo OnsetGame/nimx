@@ -33,7 +33,7 @@ proc `p4=`*(v: BezierView, val: float)=
 
 method onTouchEv*(v: BezierView, e: var Event): bool  =
     if e.buttonState == bsDown:
-        v.key = e.keyCode == MouseButtonPrimary
+        v.key = e.keyCode == VirtualKey.MouseButtonPrimary
 
     else:
         var actionHappend: bool

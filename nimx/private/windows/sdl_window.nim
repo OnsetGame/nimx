@@ -2,7 +2,7 @@ import sdl2 except Event, Rect
 
 import nimx/[ abstract_window, system_logger, view, context, event, app, screen,
                 linkage_details, portable_gl ]
-import nimx.private.sdl_vk_map
+import nimx/private/sdl_vk_map
 import opengl
 import times, logging
 
@@ -56,7 +56,7 @@ else:
             w.isFullscreen = v
 
 when defined(macosx) and not defined(ios):
-    import darwin.app_kit.nswindow
+    import darwin/app_kit/nswindow
     proc scaleFactor(w: SdlWindow): float32 =
         var wminfo: WMInfo
         discard w.impl.getWMInfo(wminfo)
@@ -423,8 +423,9 @@ method startTextInput*(w: SdlWindow, r: Rect) =
 method stopTextInput*(w: SdlWindow) =
     stopTextInput()
 
-when defined(macosx):
+when defined(macosx): # Most likely should be enabled for linux and windows...
     # Handle live resize on macos
+    {.push stackTrace: off.} # This can be called on background thread
     proc resizeEventWatch(userdata: pointer; event: ptr sdl2.Event): Bool32 {.cdecl.} =
         if event.kind == WindowEvent:
             let wndEv = cast[WindowEventPtr](event)
@@ -438,6 +439,7 @@ when defined(macosx):
                 discard mainApplication().handleEvent(evt)
             else:
                 discard
+    {.pop.}
 
 proc runUntilQuit*() =
     # Initialize fist dummy event. The kind should be any unused kind.
@@ -464,4 +466,3 @@ template runApplication*(body: typed): typed =
 
     body
     runUntilQuit()
-

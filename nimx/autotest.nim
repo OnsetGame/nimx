@@ -12,7 +12,7 @@ type UITestSuite* = ref object
 
 when defined(js) or defined(emscripten):
     when defined(emscripten):
-        import jsbind.emscripten
+        import jsbind/emscripten
 
     # When testing on Firefox, we have to use window.dump instead of console.log
     type FirefoxAutotestLogger = ref object of Logger
@@ -64,10 +64,7 @@ proc makeStep(code: proc(), astrepr, lineinfo: string): UITestSuiteStep {.inline
     result.lineinfo = lineinfo
 
 proc registerTest*(ts: UITestSuite) =
-    if registeredTests.isNil:
-        registeredTests = @[ts]
-    else:
-        registeredTests.add(ts)
+    registeredTests.add(ts)
 
 proc registeredTest*(name: string): UITestSuite =
     for t in registeredTests:
@@ -163,10 +160,10 @@ when false:
 var gTestsToRun: seq[string] # Test names which user wants to run
 
 when defined(js) or defined(emscripten):
-    import nimx.pathutils
+    import nimx/pathutils
 elif defined(android):
     import jnim
-    import android.app.activity, android.content.intent, android.os.base_bundle
+    import android/app/activity, android/content/intent, android/os/base_bundle
 else:
     import os
 
@@ -175,7 +172,7 @@ proc getAllTestNames(): seq[string] =
     for i, t in registeredTests: result[i] = t.name
 
 proc initTestsToRunIfNeeded() =
-    if gTestsToRun.isNil:
+    if gTestsToRun.len != 0:
         when defined(js) or defined(emscripten):
             let testsStr = getCurrentHref().uriParam("nimxAutoTest")
             if testsStr.len == 0:

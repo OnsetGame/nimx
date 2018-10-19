@@ -1,7 +1,7 @@
 import context, types, portable_gl, image
-import private.helper_macros
+import private/helper_macros
 import strutils, tables, hashes
-import nimsl.nimsl
+import nimsl/nimsl
 
 export portable_gl
 export context
@@ -339,7 +339,7 @@ proc newComposition*(vsDef, fsDef: static[string], requiresPrequel: bool = true,
     result.id = hash(preprocessedDefinition)
 
 template newComposition*(definition: static[string], requiresPrequel: bool = true): Composition =
-    newComposition(nil, definition, requiresPrequel)
+    newComposition("", definition, requiresPrequel)
 
 template newCompositionWithNimsl*(mainProc: typed): Composition =
     newComposition(getGLSLFragmentShader(mainProc, "compose"), false)
@@ -364,7 +364,7 @@ proc postEffectUniformName(postEffectIndex, argIndex: int): string =
 proc compileComposition*(gl: GL, comp: Composition, cchash: Hash): CompiledComposition =
     var fragmentShaderCode = ""
 
-    if (not comp.definition.isNil and comp.definition.find("GL_OES_standard_derivatives") < 0) or comp.requiresPrequel:
+    if (comp.definition.len != 0 and comp.definition.find("GL_OES_standard_derivatives") < 0) or comp.requiresPrequel:
         fragmentShaderCode &= """
             #ifdef GL_ES
             #extension GL_OES_standard_derivatives : enable
@@ -423,7 +423,7 @@ proc compileComposition*(gl: GL, comp: Composition, cchash: Hash): CompiledCompo
     fragmentShaderCode &= "}"
 
     result.new()
-    let vsCode = if comp.vsDefinition.isNil:
+    let vsCode = if comp.vsDefinition.len == 0:
             options & vertexShaderCode
         else:
             options & comp.vsDefinition
@@ -581,8 +581,7 @@ template draw*(comp: var Composition, r: Rect, code: untyped): typed =
 
     setupPosteffectUniforms(cc)
 
-    block:
-        code
+    code
     gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexCount)
     gl.bindBuffer(gl.ARRAY_BUFFER, invalidBuffer)
 

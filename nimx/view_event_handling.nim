@@ -13,17 +13,16 @@ method name*(v: View): string {.base.} =
     result = "View"
 
 method onTouchEv*(v: View, e: var Event): bool {.base.} =
-    if not v.gestureDetectors.isNil:
-        for d in v.gestureDetectors:
-            let r = d.onGestEvent(e)
-            result = result or r
+    for d in v.gestureDetectors:
+        let r = d.onGestEvent(e)
+        result = result or r
 
     if e.buttonState == bsDown:
         if v.acceptsFirstResponder:
             result = v.makeFirstResponder()
 
 method onTouchCancel*(v: View, e: var Event): bool {.base.} =
-    if not v.gestureDetectors.isNil:
+    if v.gestureDetectors.len > 0:
         for d in v.gestureDetectors:
             let r = d.onTouchCancel(e)
             result = result or r
@@ -126,7 +125,7 @@ proc processTouchEvent*(v: View, e : var Event): bool =
         if v.hidden: return false
         v.interceptEvents = false
         v.touchTarget = nil
-        if v.subviews.isNil or v.subviews.len == 0:
+        if v.subviews.len == 0:
             result = v.onTouchEv(e)
             if result:
                 e.setTouchTarget(v)
@@ -156,7 +155,7 @@ proc processTouchEvent*(v: View, e : var Event): bool =
                         e.setTouchTarget(v)
     else:
         if numberOfActiveTouches() > 0:
-            if v.subviews.isNil or v.subviews.len == 0:
+            if v.subviews.len == 0:
                 # single view
                 if not v.isMainWindow(e):
                     result = v.onTouchEv(e)

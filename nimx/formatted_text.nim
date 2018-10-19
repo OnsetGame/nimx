@@ -1,5 +1,5 @@
 import unicode, algorithm, strutils, sequtils
-import nimx.font, nimx.types, nimx.unistring, nimx.utils.lower_bound
+import nimx/font, nimx/types, nimx/unistring, nimx/utils/lower_bound
 
 
 type
@@ -72,10 +72,7 @@ proc defaultAttributes(): Attributes =
     result.textColor = blackColor()
 
 proc `text=`*(t: FormattedText, s: string) =
-    if s.isNil:
-        t.mText = ""
-    else:
-        t.mText = s
+    t.mText = s
     t.cacheValid = false
 
     if t.mAttributes.len > 0:
@@ -557,7 +554,7 @@ proc trackingOfRuneAtPos*(t: FormattedText, pos: int): float32 =
 ################################################################################
 # Drawing
 ################################################################################
-import nimx.context, nimx.composition
+import nimx/context, nimx/composition
 
 
 const GRADIENT_ENABLED = (1 shl 0) # OPTION_1
