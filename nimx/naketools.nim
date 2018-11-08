@@ -214,7 +214,7 @@ proc newBuilder*(platform: string): Builder =
     # Simulator device identifier should be set to run the simulator.
     # Available simulators can be listed with the command:
     # $ xcrun simctl list
-    b.iOSSimulatorDeviceId = "18BE8493-7EFB-4570-BF2B-5F5ACBCCB82B"
+    b.iOSSimulatorDeviceId = "booted"
 
     b.nimVerbosity = 0
     b.nimParallelBuild = 0
@@ -409,14 +409,29 @@ proc buildSDLForDesktop(b: Builder): string =
     when defined(linux):
         result = "/usr/lib"
     elif defined(macosx):
-        if fileExists("/usr/local/lib/libSDL2.a") or fileExists("/usr/local/lib/libSDL2.dylib"):
-            result = "/usr/local/lib"
-        else:
-            let xcodeProjDir = expandTilde(b.sdlRoot)/"Xcode/SDL"
-            let libDir = xcodeProjDir/"build/Release"
-            if not fileExists libDir/"libSDL2.a":
-                direShell "xcodebuild", "-project", xcodeProjDir/"SDL.xcodeproj", "-target", "Static\\ Library", "-configuration", "Release", "-sdk", "macosx"&b.macOSSDKVersion, "SYMROOT=build"
-            result = libDir
+        proc isValid(dir: string): bool =
+            fileExists(dir / "libSDL2.a") or fileExists(dir / "libSDL2.dylib")
+        result = "/usr/local/lib"
+        if isValid(result): return result
+
+        if "brew --version".execCmdEx().exitCode == 0:
+            # user has homebrew
+            let ret = "brew --prefix sdl2".execCmdEx()
+            if ret.exitCode == 0:
+                result = ret.output.string
+                stripLineEnd(result)
+                result = result / "lib"
+                doAssert isValid(result), result
+                return result
+            else:
+                echo "consider running: `brew install sdl2`; trying xcodebuild fallback"
+
+        let xcodeProjDir = expandTilde(b.sdlRoot)/"Xcode/SDL"
+        result = xcodeProjDir/"build/Release"
+        if isValid(result): return result
+        # would be cleaner with try/catch, see https://github.com/fowlmouth/nake/issues/63, to give better diagnostics
+        direShell "xcodebuild", "-project", xcodeProjDir/"SDL.xcodeproj", "-target", "Static\\ Library", "-configuration", "Release", "-sdk", "macosx"&b.macOSSDKVersion, "SYMROOT=build"
+        return result
     else:
         assert(false, "Don't know where to find SDL")
 
@@ -554,10 +569,13 @@ proc postprocessWebTarget(b: Builder) =
     copyFile(mainHTML, b.buildRoot / "main.html")
     if b.runAfterBuild:
         let settings = newSettings(staticDir = b.buildRoot)
+        when not defined(windows):
+            proc doOpen() {.async.} =
+                await sleepAsync(1)
+                openDefaultBrowser "http://localhost:5000"
+            asyncCheck doOpen()
         routes:
             get "/": redirect "main.html"
-        when not defined(windows):
-            openDefaultBrowser "http://localhost:5000"
         runForever()
 
 proc signIosBundle(b: Builder) =
@@ -754,7 +772,7 @@ proc build*(b: Builder) =
                 "--parallelBuild:" & $b.nimParallelBuild, "--out:" & b.executablePath,
                 "--nimcache:" & b.nimcachePath])
 
-    if b.platform in ["android", "ios"] and not b.avoidSDL:
+    if b.platform in ["android", "ios", "ios-sim"] and not b.avoidSDL:
         b.nimFlags.add("--noMain")
 
     if b.avoidSDL: b.nimFlags.add("-d:nimxAvoidSDL")
