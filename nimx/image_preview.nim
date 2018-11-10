@@ -85,7 +85,7 @@ method draw*(v: ImagePreview, r: Rect) =
     c.drawText(f, newPoint(5, r.height - bottomSize / 2.0), sizeInfo)
 
     var pathInfo = "Path: nil"
-    if not v.image.filePath.isNil:
+    if v.image.filePath.len != 0:
         pathInfo = "Path: " & $v.image.filePath
     c.drawText(f, newPoint(5, r.height - bottomSize), pathInfo)
 
